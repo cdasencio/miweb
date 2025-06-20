@@ -12,6 +12,8 @@
             background-color: #f5f7fa;
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         .container {
@@ -19,6 +21,8 @@
             width: 90%;
             max-width: 1200px;
             gap: 30px;
+            min-height: 80vh;
+            height: auto;
         }
         .panel {
             flex: 1;
@@ -26,26 +30,35 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        .interactive-list, .static-content {
+            flex-grow: 1;
         }
         h1 {
-            color: #6b7280; /* Gris suave para el título */
+            color: #6b7280;
             text-align: center;
             margin-bottom: 25px;
             font-size: 1.5rem;
             padding-bottom: 10px;
-            border-bottom: 2px solid #e5e7eb; /* Borde gris claro */
+            border-bottom: 2px solid #e5e7eb;
             font-weight: 600;
         }
-        .interactive-list {
+        .list-item-container, .static-item-container {
             display: flex;
-            flex-direction: column;
+            align-items: flex-start;
             gap: 10px;
+            margin-bottom: 10px;
         }
-        .list-item {
+        .list-item, .static-item {
             padding: 12px 15px;
             border-radius: 6px;
             background-color: #f8fafc;
             border-left: 4px solid #94a3b8;
+            flex-grow: 1;
+        }
+        .list-item {
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -57,18 +70,22 @@
             background-color: #e2e8f0;
             border-left: 4px solid #64748b;
         }
-        .static-content {
-            line-height: 1.8;
-            color: #334155;
-        }
-        .static-item {
-            margin-bottom: 15px;
+        .item-tag {
+            background-color: #f8fafc;
+            border-left: 4px solid #94a3b8;
+            padding: 12px 10px;
+            border-radius: 6px;
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #475569;
+            height: auto;
         }
         .nested-item {
-            margin-left: 20px; /* Sangría para items relacionados */
+            margin-left: 20px;
             margin-bottom: 10px;
             padding-left: 10px;
-            border-left: 2px solid #e5e7eb; /* Línea sutil para relación visual */
+            border-left: 2px solid #e5e7eb;
         }
     </style>
 </head>
@@ -78,36 +95,76 @@
         <div class="panel">
             <h1>MASTERING CALL FLOW AND PHONE ETIQUETTE BY STEPS</h1>
             <div class="interactive-list">
-                <div class="list-item">CASE NUMBER // NUMÉRO DE CAS</div>
-                <div class="list-item">NAME // NOM</div>
-                <div class="list-item">CALL BACK // NUMÉRO DE RAPPEL</div>
-                <div class="list-item">EMAIL // ADRESSE COURRIEL</div>
-                <div class="list-item">ISSUE // TROUBLE : EMPATHY // EMPATHIE. REVIEW PAPER WORK</div>
-                <div class="list-item">HOLD // EN ATTENTE</div>
-                <div class="list-item">PROVIDE CASE NUMBER // DONNER NUMÉRO DE BILLET</div>
-                <div class="list-item">ANYTHING ELSE? // UNE AUTRE CHOSE ?</div>
+                <div class="list-item-container">
+                    <div class="list-item">CASE NUMBER // NUMÉRO DE CAS</div>
+                </div>
+                <div class="list-item-container">
+                    <div class="list-item">NAME // NOM</div>
+                </div>
+                <div class="list-item-container">
+                    <div class="list-item">CALL BACK // NUMÉRO DE RAPPEL</div>
+                </div>
+                <div class="list-item-container">
+                    <div class="list-item">EMAIL // ADRESSE COURRIEL</div>
+                </div>
+                <div class="list-item-container">
+                    <div class="list-item">ISSUE // TROUBLE : EMPATHY // EMPATHIE. REVIEW PAPER WORK</div>
+                </div>
+                <div class="list-item-container">
+                    <div class="list-item">HOLD // EN ATTENTE</div>
+                </div>
+                <div class="list-item-container">
+                    <div class="list-item">PROVIDE CASE NUMBER // DONNER NUMÉRO DE BILLET</div>
+                </div>
+                <div class="list-item-container">
+                    <div class="list-item">ANYTHING ELSE? // UNE AUTRE CHOSE ?</div>
+                </div>
             </div>
         </div>
 
-        <!-- Panel derecho estático -->
+        <!-- Panel derecho estático con etiquetas -->
         <div class="panel">
             <h1 style="visibility: hidden;">Espaciador</h1>
             <div class="static-content">
-                <div class="static-item">Is there already any case number? // Est-ce qu'il y a déjà un numéro de cas ?</div>
-                <div class="static-item">May I know your name? // Quel est votre nom ?</div>
-                <div class="static-item">Can you provide me with your best call back number? // Quel est votre meilleur numéro de rappel ?</div>
-                <div class="static-item">Can you please confirm your email? // Quel est votre adresse courriel ?</div>
+                <div class="static-item-container">
+                    <div class="static-item">Is there already any case number? // Est-ce qu'il y a déjà un numéro de cas ?</div>
+                </div>
+                <div class="static-item-container">
+                    <div class="static-item">May I know your name? // Quel est votre nom ?</div>
+                </div>
+                <div class="static-item-container">
+                    <div class="static-item">Can you provide me with your best call back number? // Quel est votre meilleur numéro de rappel ?</div>
+                </div>
+                <div class="static-item-container">
+                    <div class="static-item">Can you please confirm your email? // Quel est votre adresse courriel ?</div>
+                </div>
                 
                 <!-- Grupo para ISSUE/TROUBLE -->
-                <div class="static-item">Issue // Trouble :</div>
-                <div class="nested-item">It's going to be my pleasure // Avec plaisir Je vais vous aider</div>
-                <div class="nested-item">Let me do my best // Laissez-moi faire mon meilleur effort</div>
-                <div class="nested-item">Let me take care of this // Ne vous inquiétez pas, je vais prendre soin de ça.</div>
-                <div class="nested-item">I really apologize for that // Je m'excuse vraiment pour ça</div>
+                <div class="static-item-container">
+                    <div class="static-item">Issue // Trouble :</div>
+                </div>
+                <div class="nested-item">
+                    <div class="static-item">It's going to be my pleasure // Avec plaisir Je vais vous aider</div>
+                </div>
+                <div class="nested-item">
+                    <div class="static-item">Let me do my best // Laissez-moi faire mon meilleur effort</div>
+                </div>
+                <div class="nested-item">
+                    <div class="static-item">Let me take care of this // Ne vous inquiétez pas, je vais prendre soin de ça.</div>
+                </div>
+                <div class="nested-item">
+                    <div class="static-item">I really apologize for that // Je m'excuse vraiment pour ça</div>
+                </div>
                 
-                <div class="static-item">HOLD• Allow me, please X minutes // EN ATTENTE• Donne-moi s'il vous plaît quelques X minutes.</div>
-                <div class="static-item">Ok, let me go ahead and provide you with your case number. // Laissez-moi vous donner votre numéro de billet.</div>
-                <div class="static-item">Anything else to help you today? // À part ça, est-ce qu'il y a une autre chose pour vous aider?</div>
+                <div class="static-item-container">
+                    <div class="static-item">HOLD• Allow me, please X minutes // EN ATTENTE• Donne-moi s'il vous plaît quelques X minutes.</div>
+                </div>
+                <div class="static-item-container">
+                    <div class="static-item">Ok, let me go ahead and provide you with your case number. // Laissez-moi vous donner votre numéro de billet.</div>
+                </div>
+                <div class="static-item-container">
+                    <div class="static-item">Anything else to help you today? // À part ça, est-ce qu'il y a une autre chose pour vous aider?</div>
+                </div>
             </div>
         </div>
     </div>
