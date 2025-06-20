@@ -31,9 +31,11 @@
             padding: 25px;
             display: flex;
             flex-direction: column;
+            position: relative; /* Para posicionar el botón en relación a este panel */
         }
-        .interactive-list, .static-content {
+        .interactive-list {
             flex-grow: 1;
+            overflow-y: auto; /* Hacer que la lista sea desplazable */
         }
         h1 {
             color: #6b7280;
@@ -86,6 +88,22 @@
             padding-left: 10px;
             border-left: 2px solid #e5e7eb;
         }
+        .reset-button {
+            background-color: #d1d5db; /* Color gris */
+            color: #000; /* Texto negro */
+            border: none;
+            border-radius: 6px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            align-self: center; /* Centrar el botón */
+            position: sticky; /* Fijar el botón en la parte inferior del panel */
+            bottom: 25px; /* Espaciado desde la parte inferior */
+        }
+        .reset-button:hover {
+            background-color: #9ca3af; /* Color gris más oscuro al pasar el mouse */
+        }
     </style>
 </head>
 <body>
@@ -119,6 +137,7 @@
                     <div class="list-item">ANYTHING ELSE? // UNE AUTRE CHOSE ?</div>
                 </div>
             </div>
+            <button class="reset-button">RESET</button> <!-- Botón RESET agregado -->
         </div>
 
         <!-- Panel derecho estático con etiquetas -->
@@ -171,10 +190,17 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const items = document.querySelectorAll('.list-item');
+            const resetButton = document.querySelector('.reset-button');
             
             items.forEach(item => {
                 item.addEventListener('click', function() {
                     this.classList.toggle('active');
+                });
+            });
+
+            resetButton.addEventListener('click', function() {
+                items.forEach(item => {
+                    item.classList.remove('active');
                 });
             });
         });
