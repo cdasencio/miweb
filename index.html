@@ -1,3 +1,4 @@
+```
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -104,6 +105,42 @@
         .reset-button:hover {
             background-color: #9ca3af; /* Color gris más oscuro al pasar el mouse */
         }
+        .selection-count {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #64748b;
+            font-size: 1.2rem;
+        }
+        .timer-container {
+            width: 2cm; /* Reduced size */
+            height: 2cm; /* Reduced size */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+            border-radius: 6px;
+            background: #f8fafc;
+            border: 2px solid #d1d5db;
+            cursor: pointer;
+        }
+        .timer-display {
+            font-size: 1.2rem; /* Adjusted font size */
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .timer-label {
+            font-size: 0.7rem; /* Adjusted font size */
+            color: #64748b;
+        }
+        .timer-critical {
+            animation: blinker 1s linear infinite;
+            color: #dc2626;
+        }
+        @keyframes blinker {
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
@@ -130,6 +167,10 @@
                 <div class="list-item-container">
                     <div class="list-item">HOLD // EN ATTENTE</div>
                 </div>
+                <div class="timer-container" id="timer-container">
+                    <div class="timer-display" id="timer">00:00</div>
+                    <div class="timer-label">Click to Start/Reset</div>
+                </div>
                 <div class="list-item-container">
                     <div class="list-item">PROVIDE CASE NUMBER // DONNER NUMÉRO DE BILLET</div>
                 </div>
@@ -137,6 +178,7 @@
                     <div class="list-item">ANYTHING ELSE? // UNE AUTRE CHOSE ?</div>
                 </div>
             </div>
+            <div class="selection-count"><span id="count"></span></div> <!-- Removed the zero -->
             <button class="reset-button">RESET</button> <!-- Botón RESET agregado -->
         </div>
 
@@ -162,23 +204,26 @@
                     <div class="static-item">Issue // Trouble :</div>
                 </div>
                 <div class="nested-item">
-                    <div class="static-item">It's going to be my pleasure // Avec plaisir Je vais vous aider</div>
+                    <div class="static-item">I really apologize for that // Je m'excuse vraiment pour ça</div>
+                </div>
+                <div class="nested-item">
+                    <div class="static-item">I know how that feels, I'm so sorry you're going through this // Je comprends ce que vous ressentez, Je suis vraiment désolé que vous expérimentiez cette situation</div>
+                </div>
+                <div class="nested-item">
+                    <div class="static-item">Let me take care of this // Ne vous inquiétez pas, je vais prendre soin de ça</div>
+                </div>
+                <div class="nested-item">
+                    <div class="static-item">It's going to be my pleasure to help you // Avec plaisir Je vais vous aider</div>
                 </div>
                 <div class="nested-item">
                     <div class="static-item">Let me do my best // Laissez-moi faire mon meilleur effort</div>
                 </div>
-                <div class="nested-item">
-                    <div class="static-item">Let me take care of this // Ne vous inquiétez pas, je vais prendre soin de ça.</div>
-                </div>
-                <div class="nested-item">
-                    <div class="static-item">I really apologize for that // Je m'excuse vraiment pour ça</div>
-                </div>
                 
                 <div class="static-item-container">
-                    <div class="static-item">HOLD• Allow me, please X minutes // EN ATTENTE• Donne-moi s'il vous plaît quelques X minutes.</div>
+                    <div class="static-item">HOLD • Can you allow me 3 to 4 minutes on a brief silence-hold? Can I place you on a brief silence-hold during 3 to 4 minutes? // EN ATTENTE • Est-ce que je peux vous mettre en attente pendant 3 à 4 minutes, s'il vous plaît ? Est-ce que vous pouvez patienter quelques 3 à 4 minutes, s'il vous plaît ? Je vous reviens</div>
                 </div>
                 <div class="static-item-container">
-                    <div class="static-item">Ok, let me go ahead and provide you with your case number. // Laissez-moi vous donner votre numéro de billet.</div>
+                    <div class="static-item">Ok, let me go ahead and provide you with your case number // Laissez-moi vous donner votre numéro de billet </div>
                 </div>
                 <div class="static-item-container">
                     <div class="static-item">Anything else to help you today? // À part ça, est-ce qu'il y a une autre chose pour vous aider?</div>
@@ -191,19 +236,100 @@
         document.addEventListener('DOMContentLoaded', function() {
             const items = document.querySelectorAll('.list-item');
             const resetButton = document.querySelector('.reset-button');
-            
-            items.forEach(item => {
+            const countDisplay = document.getElementById('count');
+
+            // Cargar el estado de selección desde localStorage
+            items.forEach((item, index) => {
+                if (localStorage.getItem(`item-${index}`) === 'true') {
+                    item.classList.add('active');
+                }
                 item.addEventListener('click', function() {
                     this.classList.toggle('active');
+                    updateCount();
+                    // Guardar el estado en localStorage
+                    localStorage.setItem(`item-${index}`, this.classList.contains('active'));
                 });
             });
 
             resetButton.addEventListener('click', function() {
-                items.forEach(item => {
+                items.forEach((item, index) => {
                     item.classList.remove('active');
+                    localStorage.removeItem(`item-${index}`);
                 });
+                updateCount();
+                
+                // Stop the timer without resetting
+                clearInterval(timerInterval);
+                isRunning = false; // Stop the timer
+                timerLabel.textContent = 'Click to Start'; // Update label
+                timerDisplay.classList.remove('timer-critical'); // Remove critical class
+                seconds = 0; // Reset seconds to 0
+                timerDisplay.textContent = '00:00'; // Reset display
             });
+
+            function updateCount() {
+                const activeItems = document.querySelectorAll('.list-item.active');
+                countDisplay.textContent = activeItems.length > 0 ? activeItems.length : ''; // Show count or empty
+            }
+
+            // Inicializar el contador al cargar la página
+            updateCount();
+
+            // Timer functionality
+            const timerContainer = document.querySelector('.timer-container');
+            const timerDisplay = document.getElementById('timer');
+            const timerLabel = document.querySelector('.timer-label');
+            let seconds = 0;
+            let timerInterval;
+            let isRunning = false; // Tracks if timer is currently running
+
+            function startTimer() {
+                if (!isRunning) {
+                    // Start the timer
+                    isRunning = true;
+                    timerLabel.textContent = 'Click to Reset';
+                    timerInterval = setInterval(updateTimer, 1000);
+                } else {
+                    // Reset the timer
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    seconds = 0;
+                    timerDisplay.textContent = '00:00';
+                    timerDisplay.classList.remove('timer-critical');
+                    timerLabel.textContent = 'Click to Start';
+                }
+            }
+
+            function updateTimer() {
+                if (seconds >= 240) {
+                    clearInterval(timerInterval);
+                    isRunning = false; // Stop the timer
+                    timerLabel.textContent = 'Click to Start'; // Update label
+                    return;
+                }
+                
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                // Critical time (2:45, or 165 seconds)
+                if (seconds >= 165) {
+                    timerDisplay.classList.add('timer-critical');
+                } else {
+                    timerDisplay.classList.remove('timer-critical');
+                }
+            }
+
+            // Initialize timer to reset state
+            seconds = 0;
+            timerDisplay.textContent = '00:00';
+            timerLabel.textContent = 'Click to Start';
+            isRunning = false;
+            
+            timerContainer.addEventListener('click', startTimer);
         });
     </script>
 </body>
 </html>
+```
