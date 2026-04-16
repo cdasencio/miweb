@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Detector de Gemas 💎 PRO+ AI Hedge Fund</title>
+<style>
+body { font-family: Arial; background:#0b1220; color:#e5e7eb; padding:20px; }
+h1 { color:#60a5fa; }
+.table { width:100%; border-collapse:collapse; margin-top:15px; }
+.table th, .table td { padding:10px; text-align:left; vertical-align:middle; }
+.table tr { border-bottom:1px solid #1f2937; }
+.green { color:#22c55e; }
+.red { color:#ef4444; }
+.panel { background:#111827; padding:12px; border-radius:10px; margin-top:10px; }
+.contract { font-size:12px; word-break:break-all; color:#9ca3af; }
+button { padding:8px 10px; border:none; border-radius:8px; background:#60a5fa; cursor:pointer; margin:2px; }
+input, select { padding:8px; border-radius:8px; border:none; width:260px; margin:4px 0; }
+.section { margin-top:25px; }
+.topbar { display:flex; gap:10px; margin-bottom:10px; }
+.small { font-size:12px; color:#9ca3af; }
+.search-item{padding:8px;border-bottom:1px solid #1f2937;cursor:pointer}
+.search-item:hover{background:#111827}
+</style>
+</head>
+<body>
+
+<h1>🚀 Detector de Gemas PRO+ AI Hedge Fund</h1>
+
+<div class="topbar">
+<button onclick="runDetector()">🔄 Actualizar</button>
+<button onclick="toggleAuto()">⚡ Auto</button>
+</div>
+
+<p id="status"></p>
+<div id="topSignal" class="panel">Analizando mercado...</div>
+
+<!-- 🔴 MAXIMA ALERTA -->
+<div class="section">
+<h2>🔴 Máxima Alerta (10/10)</h2>
+<div id="maxAlert" class="panel"></div>
+</div>
+
+<!-- 🔥 OPORTUNIDADES TEMPRANAS -->
+<div class="section">
+<h2>🔥 Oportunidades tempranas</h2>
+<div id="earlyList" class="panel"></div>
+</div>
+
+<!-- 📌 WATCHLIST + BUSCADOR + SELECTOR -->
+<div class="section">
+<h2>📌 Watchlist + Buscador (DEX Screener Mode PRO)</h2>
+
+<input id="searchInput" placeholder="Buscar token o contrato (ej: PEPE)" />
+<button onclick="searchTokens()">Buscar</button>
+<button onclick="clearSearch()">Limpiar búsqueda</button>
+
+<div id="searchResults" class="panel"></div>
+
+<br><br>
+
+<select id="tokenSelect">
+<option value="">🔽 Selecciona un token...</option>
+</select>
+<button onclick="addFromSelect()">Agregar a Watchlist</button>
+
+<br><br>
+
+<input id="pinInput" placeholder="Pegar contrato manual (opcional)" />
+<button onclick="addPinned()">Pinear</button>
+
+<div id="watchList"></div>
+</div>
+
+<!-- 🌍 RANKING -->
+<div class="section">
+<h2>🌍 Ranking IA</h2>
+<table class="table">
+<thead>
+<tr>
+<th>Token</th><th>Precio</th><th>24h</th><th>Vol</th><th>Liq</th><th>IA</th><th>Decisión</th><th>Contrato</th><th>Acción</th>
+</tr>
+</thead>
+<tbody id="rank"></tbody>
+</table>
+</div>
+
+<script>
+let auto=false, interval;
+let tokens=[];
+let pinned=JSON.parse(localStorage.getItem('pinned')||'[]');
+
+function save(){ localStorage.setItem('pinned',JSON.stringify(pinned)); }
+
+function score(t){
+  let s=0;
+  if(t.liq>200000) s+=3; else if(t.liq>80000) s+=2; else if(t.liq>30000) s+=1;
+  if(t.vol>200000) s+=3; else if(t.vol>50000) s+=2;
+  if(t.chg>2 && t.chg<20) s+=3;
+  if(t.chg>40) return 0;
+  return Math.min(10,s);
+}
+
+function decision(s){
+  if(s>=9) return '🟢 ENTRAR SEGURO';
+  if(s>=7) return '🔵 SEGUIR';
+  if(s>=5) return '🟡 OBSERVAR';
+  return '❌ DESCARTAR';
+}
+
+async function runDetector(){
+  const status=document.getElementById('status');
+  status.innerText='⏳ Escaneando...';
+
+  try{
+    const res=await fetch('https://api.dexscreener.com/latest/dex/search?q=uniswap');
+    const data=await res.json();
+
+    tokens=(data.pairs||[]).map(t=>{
+      return {
+        name:t.baseToken.symbol,
+        price:t.priceUsd||0,
+        vol:t.volume?.h24||0,
+        liq:t.liquidity?.usd||0,
+        chg:t.priceChange?.h24||0,
+        address:t.baseToken.address,
+        time:new Date().toLocaleString(),
+        ai:score({liq:t.liquidity?.usd||0,vol:t.volume?.h24||0,chg:t.priceChange?.h24||0})
+      };
+    });
+
+    renderMax();
+    renderEarly();
+    renderRank();
+    renderSelect();
+    renderWatch();
+
+    status.innerText='✅ Listo';
+  }catch(e){
+    console.error(e);
+    status.innerText='❌ Error cargando datos';
+  }
+}
+
+function renderMax(){
+  const box=document.getElementById('maxAlert');
+  const list=tokens.filter(t=>t.ai>=9);
+
+  box.innerHTML = list.length ? list.map(t=>`
+    <div>
+      🔥 <b>${t.name}</b> | $${t.price}
+      <div class='small'>🧠 ${t.ai}/10 | ${t.time}</div>
+      <div class='contract'>${t.address}</div>
+    </div>
+  `).join('') : 'Sin señales 9/10';
+}
+
+function renderEarly(){
+  const box=document.getElementById('earlyList');
+  const list=tokens.filter(t=>t.ai>=6 && t.ai<9);
+
+  box.innerHTML = list.length ? list.map(t=>`
+    <div>
+      🚀 <b>${t.name}</b> | $${t.price}
+      <div class='small'>🧠 ${t.ai}/10 | ${t.time}</div>
+      <div class='contract'>${t.address}</div>
+    </div>
+  `).join('') : 'Sin oportunidades tempranas';
+}
+
+function searchTokens(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const res=tokens.filter(t=>t.name.toLowerCase().includes(q)||t.address.toLowerCase().includes(q));
+
+  document.getElementById('searchResults').innerHTML = res.length ? res.map(t=>`
+    <div class='search-item'>
+      <b>${t.name}</b><br>
+      <span class='contract'>${t.address}</span><br>
+      <button onclick="addPinnedDirect('${t.address}')">Pinear</button>
+    </div>
+  `).join('') : 'Sin resultados';
+}
+
+function clearSearch(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchResults').innerHTML='';
+}
+
+function renderSelect(){
+  const sel=document.getElementById('tokenSelect');
+  sel.innerHTML='<option value="">🔽 Selecciona un token...</option>';
+
+  tokens.slice(0,100).forEach(t=>{
+    const opt=document.createElement('option');
+    opt.value=t.address;
+    opt.textContent=`${t.name} | IA ${t.ai}/10`;
+    sel.appendChild(opt);
+  });
+}
+
+function addFromSelect(){
+  const sel=document.getElementById('tokenSelect');
+  if(!sel.value) return;
+  addPinnedDirect(sel.value);
+}
+
+function addPinned(){
+  addPinnedDirect(document.getElementById('pinInput').value.trim());
+}
+
+function addPinnedDirect(addr){
+  if(!addr || pinned.includes(addr) || pinned.length>=20) return;
+  pinned.push(addr);
+  save();
+  renderWatch();
+}
+
+function removePinned(v){
+  pinned=pinned.filter(p=>p!==v);
+  save();
+  renderWatch();
+}
+
+function renderWatch(){
+  const box=document.getElementById('watchList');
+  const list=tokens.filter(t=>pinned.includes(t.address));
+
+  box.innerHTML=list.map(t=>`
+    <div class='panel'>
+      <b>${t.name}</b><br>
+      💰 $${t.price}<br>
+      📊 ${t.chg}%<br>
+      📦 ${t.vol}<br>
+      💧 ${t.liq}<br>
+      🧠 ${t.ai}/10<br>
+      <div class='contract'>${t.address}</div><br>
+      <button onclick="removePinned('${t.address}')">Despinear</button>
+    </div>
+  `).join('');
+}
+
+function renderRank(){
+  const box=document.getElementById('rank');
+  box.innerHTML=tokens.sort((a,b)=>b.ai-a.ai).map(t=>`
+    <tr>
+      <td>${t.name}</td>
+      <td>$${t.price}</td>
+      <td class='${t.chg>=0?'green':'red'}'>${t.chg}%</td>
+      <td>${t.vol}</td>
+      <td>${t.liq}</td>
+      <td>${t.ai}/10</td>
+      <td>${decision(t.ai)}</td>
+      <td class='contract'>${t.address}</td>
+      <td><button onclick="addPinnedDirect('${t.address}')">Pinear</button></td>
+    </tr>
+  `).join('');
+}
+
+function toggleAuto(){
+  auto=!auto;
+  if(auto){runDetector();interval=setInterval(runDetector,15000);}else clearInterval(interval);
+}
+
+window.onload=runDetector;
+</script>
+
+</body>
+</html>
