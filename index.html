@@ -1,270 +1,270 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mastering Call Flow</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            background-color: #f5f7fa;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .container {
-            display: flex;
-            width: 90%;
-            max-width: 1200px;
-            gap: 30px;
-            min-height: 80vh;
-            height: auto;
-        }
-        .panel {
-            flex: 1;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-        .interactive-list {
-            flex-grow: 1;
-            overflow-y: auto;
-        }
-        h1 {
-            color: #6b7280;
-            text-align: center;
-            margin-bottom: 25px;
-            font-size: 1.5rem;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e5e7eb;
-            font-weight: 600;
-        }
-        .list-item-container, .static-item-container {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .list-item, .static-item {
-            padding: 12px 15px;
-            border-radius: 6px;
-            background-color: #f8fafc;
-            border-left: 4px solid #94a3b8;
-            flex-grow: 1;
-        }
-        .list-item {
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .list-item:hover {
-            background-color: #e2e8f0;
-        }
-        .list-item.active {
-            font-weight: bold;
-            background-color: #e2e8f0;
-            border-left: 4px solid #64748b;
-        }
-        .item-tag {
-            background-color: #f8fafc;
-            border-left: 4px solid #94a3b8;
-            padding: 12px 10px;
-            border-radius: 6px;
-            min-width: 40px;
-            text-align: center;
-            font-weight: bold;
-            color: #475569;
-            height: auto;
-        }
-        .nested-item {
-            margin-left: 20px;
-            margin-bottom: 10px;
-            padding-left: 10px;
-            border-left: 2px solid #e5e7eb;
-        }
-        .reset-button {
-            background-color: #d1d5db;
-            color: #000;
-            border: none;
-            border-radius: 6px;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 15px;
-            align-self: center;
-            position: sticky;
-            bottom: 25px;
-        }
-        .reset-button:hover {
-            background-color: #9ca3af;
-        }
-        .selection-count {
-            text-align: center;
-            margin-top: 10px;
-            font-weight: bold;
-            color: #64748b;
-            font-size: 1.2rem;
-        }
-        .timer-container {
-            width: 2cm;
-            height: 2cm;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 10px auto;
-            border-radius: 6px;
-            background: #f8fafc;
-            border: 2px solid #d1d5db;
-            cursor: pointer;
-        }
-        .timer-display {
-            font-size: 1.2rem;
-            font-weight: bold;
-            font-family: monospace;
-        }
-        .timer-label {
-            font-size: 0.7rem;
-            color: #64748b;
-        }
-        .timer-critical {
-            animation: blinker 1s linear infinite;
-            color: #dc2626;
-        }
-        .important-item {
-            text-align: center;
-            cursor: pointer;
-        }
-        @keyframes blinker {
-            50% { opacity: 0.5; }
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Detector de Gemas 💎 PRO+</title>
+<style>
+body { font-family: Arial; background:#0b1220; color:#e5e7eb; padding:20px; }
+h1 { color:#60a5fa; }
+.table { width:100%; border-collapse:collapse; margin-top:15px; }
+.table th, .table td { padding:10px; text-align:left; }
+.table th { color:#9ca3af; }
+.table tr { border-bottom:1px solid #1f2937; }
+.green { color:#22c55e; }
+.red { color:#ef4444; }
+.badge { background:#111827; padding:4px 8px; border-radius:999px; }
+.toolbar { margin-bottom:10px; display:flex; gap:10px; }
+button { padding:10px; border:none; border-radius:8px; background:#60a5fa; cursor:pointer; }
+#topSignal { margin-top:15px; padding:12px; background:#111827; border-radius:10px; }
+.list { margin-top:20px; }
+
+.contract {
+  background:#111827;
+  padding:6px 10px;
+  border-radius:6px;
+  font-size:12px;
+  display:inline-block;
+}
+
+.buy-btn {
+  background:#1f2937;
+  color:#60a5fa;
+  padding:6px 10px;
+  border-radius:6px;
+  text-decoration:none;
+  font-weight:bold;
+}
+
+.buy-btn:hover {
+  background:#374151;
+}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="panel">
-            <h1>MASTERING CALL FLOW AND PHONE ETIQUETTE BY STEPS</h1>
-            <div class="interactive-list">
-                <div class="list-item-container"> <div class="list-item">CASE NUMBER // NUMÉRO DE CAS</div> </div>
-                <div class="list-item-container"> <div class="list-item">YOU MUST UPDATE CALL CLASSIFICATION // SAISIR LES INFORMATIONS POUR LA CLASSIFICATION DES APPELS</div> </div>
-                <div class="list-item-container"> <div class="list-item">NAME // NOM</div> </div>
-                <div class="list-item-container"> <div class="list-item">CALL BACK // NUMÉRO DE RAPPEL</div> </div>
-                <div class="list-item-container"> <div class="list-item">EMAIL // ADRESSE COURRIEL</div> </div>
-                <div class="list-item-container"> <div class="list-item">ISSUE // TROUBLE : EMPATHY // EMPATHIE. REVIEW PAPER WORK</div> </div>
-                <div class="list-item-container"> <div class="list-item">HOLD // EN ATTENTE</div> </div>
-                <div class="timer-container" id="timer-container">
-                    <div class="timer-display" id="timer">00:00</div>
-                    <div class="timer-label">Click to Start/Reset</div>
-                </div>
-                <div class="list-item-container"> <div class="list-item">PROVIDE CASE NUMBER // DONNER NUMÉRO DE BILLET</div> </div>
-                <div class="list-item-container"> <div class="list-item">ANYTHING ELSE? // UNE AUTRE CHOSE ?</div> </div>
-                <div class="list-item-container"> <div class="list-item important-item">I CONFIRM I'VE CLASSIFIED THIS CALL AS THIS IS MANDATORY</div> </div>
-            </div>
-            <div class="selection-count"><span id="count"></span></div>
-            <button class="reset-button">RESET</button>
-        </div>
-        <div class="panel">
-            <h1 style="visibility: hidden;">Espaciador</h1>
-            <div class="static-content">
-                <div class="static-item-container"> <div class="static-item">Is there already any case number? // Est-ce qu'il y a déjà un numéro de cas ?</div> </div>
-                <div class="static-item-container"> <div class="static-item">May I know your name? // Quel est votre nom ?</div> </div>
-                <div class="static-item-container"> <div class="static-item">Can you provide me with your best call back number? // Quel est votre meilleur numéro de rappel ?</div> </div>
-                <div class="static-item-container"> <div class="static-item">Can you please confirm your email? // Quel est votre adresse courriel ?</div> </div>
-                <div class="static-item-container"> <div class="static-item">Issue // Trouble :</div> </div>
-                <div class="nested-item"> <div class="static-item">I really apologize for that // Je m'excuse vraiment pour ça</div> </div>
-                <div class="nested-item"> <div class="static-item">I know how that feels, I'm so sorry you're going through this // Je comprends ce que vous ressentez, Je suis vraiment désolé que vous expérimentiez cette situation</div> </div>
-                <div class="nested-item"> <div class="static-item">Let me take care of this // Ne vous inquiétez pas, je vais prendre soin de ça</div> </div>
-                <div class="nested-item"> <div class="static-item">It's going to be my pleasure to help you // Avec plaisir Je vais vous aider</div> </div>
-                <div class="nested-item"> <div class="static-item">Let me do my best // Laissez-moi faire mon meilleur effort</div> </div>
-                <div class="static-item-container"> <div class="static-item">HOLD • Can you allow me 3 to 4 minutes on a brief silence-hold? Can I place you on a brief silence-hold during 3 to 4 minutes? // EN ATTENTE • Est-ce que je peux vous mettre en attente pendant 3 à 4 minutes, s'il vous plaît ? Est-ce que vous pouvez patienter quelques 3 à 4 minutes, s'il vous plaît ? Je vous reviens</div> </div>
-                <div class="static-item-container"> <div class="static-item">Ok, let me go ahead and provide you with your case number // Laissez-moi vous donner votre numéro de billet </div> </div>
-                <div class="static-item-container"> <div class="static-item">Anything else to help you today? // À part ça, est-ce qu'il y a une autre chose pour vous aider?</div> </div>
-            </div>
-        </div>
-    </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const items = document.querySelectorAll('.list-item');
-            const resetButton = document.querySelector('.reset-button');
-            const countDisplay = document.getElementById('count');
-            items.forEach((item, index) => {
-                if (localStorage.getItem(`item-${index}`) === 'true') {
-                    item.classList.add('active');
-                }
-                item.addEventListener('click', function() {
-                    this.classList.toggle('active');
-                    updateCount();
-                    localStorage.setItem(`item-${index}`, this.classList.contains('active'));
-                });
-            });
-            resetButton.addEventListener('click', function() {
-                items.forEach((item, index) => {
-                    item.classList.remove('active');
-                    localStorage.removeItem(`item-${index}`);
-                });
-                updateCount();
-                clearInterval(timerInterval);
-                isRunning = false;
-                timerLabel.textContent = 'Click to Start';
-                timerDisplay.classList.remove('timer-critical');
-                seconds = 0;
-                timerDisplay.textContent = '00:00';
-            });
-            function updateCount() {
-                const activeItems = document.querySelectorAll('.list-item.active');
-                countDisplay.textContent = activeItems.length > 0 ? activeItems.length : '';
-            }
-            updateCount();
-            const timerContainer = document.querySelector('.timer-container');
-            const timerDisplay = document.getElementById('timer');
-            const timerLabel = document.querySelector('.timer-label');
-            let seconds = 0;
-            let timerInterval;
-            let isRunning = false;
-            function startTimer() {
-                if (!isRunning) {
-                    isRunning = true;
-                    timerLabel.textContent = 'Click to Reset';
-                    timerInterval = setInterval(updateTimer, 1000);
-                } else {
-                    clearInterval(timerInterval);
-                    isRunning = false;
-                    seconds = 0;
-                    timerDisplay.textContent = '00:00';
-                    timerDisplay.classList.remove('timer-critical');
-                    timerLabel.textContent = 'Click to Start';
-                }
-            }
-            function updateTimer() {
-                if (seconds >= 240) {
-                    clearInterval(timerInterval);
-                    isRunning = false;
-                    timerLabel.textContent = 'Click to Start';
-                    return;
-                }
-                seconds++;
-                const mins = Math.floor(seconds / 60);
-                const secs = seconds % 60;
-                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                if (seconds >= 165) {
-                    timerDisplay.classList.add('timer-critical');
-                } else {
-                    timerDisplay.classList.remove('timer-critical');
-                }
-            }
-            seconds = 0;
-            timerDisplay.textContent = '00:00';
-            timerLabel.textContent = 'Click to Start';
-            isRunning = false;
-            timerContainer.addEventListener('click', startTimer);
-        });
-    </script>
+
+<h1>💎 Detector de Gemas PRO+</h1>
+
+<div class="toolbar">
+<button onclick="runDetector()">🔄 Actualizar</button>
+<button onclick="toggleAuto()">⚡ Auto</button>
+</div>
+
+<p id="status"></p>
+<div id="topSignal">Esperando datos...</div>
+
+<h2>🔥 Entradas fuertes</h2>
+<table class="table">
+<thead>
+<tr>
+<th>Token</th>
+<th>Precio</th>
+<th>Volumen</th>
+<th>Liquidez</th>
+<th>Timing</th>
+<th>Señal</th>
+</tr>
+</thead>
+<tbody id="tableBody"></tbody>
+</table>
+
+<h2>🧠 Gemas tempranas</h2>
+<div id="earlyGems" class="list"></div>
+
+<h2>🌍 Ranking global</h2>
+<table class="table">
+<thead>
+<tr>
+<th>#</th>
+<th>Token</th>
+<th>Precio</th>
+<th>24h %</th>
+<th>Volumen</th>
+<th>Probabilidad</th>
+<th>Acción</th>
+<th>Contrato</th>
+<th>DEX</th>
+<th>Comprar</th>
+</tr>
+</thead>
+<tbody id="cmcList"></tbody>
+</table>
+
+<script>
+let auto=false, interval;
+let lastAlerts = {};
+
+async function runDetector(){
+  const status = document.getElementById('status');
+  status.textContent = '⏳ Escaneando...';
+
+  try{
+    const res = await fetch('https://api.dexscreener.com/latest/dex/search?q=trend');
+    const data = await res.json();
+
+    const pairs = data?.pairs || [];
+
+    const tokens = pairs.map(t=>{
+      const liq = t.liquidity?.usd||0;
+      const vol = t.volume?.h24||0;
+      const chg = t.priceChange?.h24||0;
+      const price = t.priceUsd||0;
+      const address = t.baseToken.address || 'N/A';
+      const dex = t.dexId || 'DEX';
+
+      let score = 0;
+
+      if(liq>150000) score+=3;
+      else if(liq>80000) score+=2;
+
+      if(vol>300000) score+=3;
+      else if(vol>100000) score+=2;
+
+      if(chg>0 && chg<20) score+=2;
+
+      if(vol>50000 && chg<10 && liq>50000) score+=2;
+
+      if(chg>35) score-=2;
+
+      let early = false;
+      if(vol>40000 && liq<90000 && chg<12 && chg>0){ early = true; score+=1; }
+
+      return {name:t.baseToken.symbol, price, vol, liq, chg, score, early, address, dex};
+    });
+
+    renderStrong(tokens.filter(t=>t.score>=8));
+    renderEarly(tokens.filter(t=>t.early).slice(0,5));
+    renderCMC(tokens);
+    checkAlerts(tokens);
+
+    const best = [...tokens].sort((a,b)=>b.score - a.score)[0];
+    highlightTop(best);
+
+    status.textContent='✅ Listo';
+  }catch(e){
+    status.textContent='❌ Error';
+    console.error(e);
+  }
+}
+
+function getTiming(t){
+  if(t.chg > 25) return '⛔ MUY TARDE';
+  if(t.chg > 10) return '⌛ ESPERAR';
+  return '⚡ ENTRAR';
+}
+
+function renderStrong(list){
+  const body=document.getElementById('tableBody');
+  let html='';
+
+  list.forEach(t=>{
+    html += `
+    <tr>
+      <td>${t.name}</td>
+      <td>$${Number(t.price).toFixed(6)}</td>
+      <td>$${Number(t.vol).toLocaleString()}</td>
+      <td>$${Number(t.liq).toLocaleString()}</td>
+      <td>${getTiming(t)}</td>
+      <td>🟢 ENTRAR</td>
+    </tr>`;
+  });
+
+  body.innerHTML = html;
+}
+
+function renderEarly(list){
+  const box=document.getElementById('earlyGems');
+  if(list.length===0){ box.textContent='❌ No early gems'; return; }
+
+  box.innerHTML = list.map(t=>
+    `<div>🧠 ${t.name} | Vol: $${Number(t.vol).toLocaleString()} | Liquidez: $${Number(t.liq).toLocaleString()}</div>`
+  ).join('');
+}
+
+function renderCMC(list){
+  const body=document.getElementById('cmcList');
+  body.innerHTML='';
+
+  const sorted = [...list].sort((a,b)=> b.score - a.score);
+
+  sorted.forEach((t,i)=>{
+    let prob = Math.min(t.score,10);
+    const color = t.chg>=0 ? 'green':'red';
+
+    let accion='❌ NO ENTRAR';
+    if(t.early && prob>=6) accion='🧠 ACUMULANDO';
+    if(prob>=8) accion='🟢 ENTRAR';
+    else if(prob>=6) accion='🔵 VIGILAR';
+    else if(prob===5) accion='🟡 INTERÉS BAJO';
+
+    const dexLink = t.address !== 'N/A'
+      ? `https://dexscreener.com/search?q=${t.address}`
+      : '#';
+
+    const buyLink = t.address !== 'N/A'
+      ? `https://dexscreener.com/ethereum/${t.address}`
+      : '#';
+
+    body.innerHTML += `
+    <tr>
+      <td>#${i+1}</td>
+      <td>${t.name}</td>
+      <td>$${Number(t.price).toFixed(6)}</td>
+      <td class="${color}">${Number(t.chg).toFixed(2)}%</td>
+      <td>$${Number(t.vol).toLocaleString()}</td>
+      <td><span class="badge">${prob}/10</span></td>
+      <td>${accion}</td>
+      <td><span class="contract">${t.address}</span></td>
+      <td><a class="buy-btn" href="${dexLink}" target="_blank">📊 Ver</a></td>
+      <td><a class="buy-btn" href="${buyLink}" target="_blank">🛒 DEX</a></td>
+    </tr>`;
+  });
+}
+
+function highlightTop(t){
+  const box=document.getElementById('topSignal');
+  if(!t){ box.textContent='Sin datos'; return; }
+  box.innerHTML=`🔥 TOP: ${t.name} | ${t.score>=8?'ENTRAR':'OBSERVAR'}`;
+}
+
+function toggleAuto(){
+  auto=!auto;
+  if(auto){ runDetector(); interval=setInterval(runDetector,15000);} 
+  else clearInterval(interval);
+}
+
+function checkAlerts(tokens){
+  tokens.forEach(t=>{
+    let prob = Math.min(t.score,10);
+
+    if(prob>=8 && !lastAlerts[t.address]){
+      lastAlerts[t.address]=true;
+
+      const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+      audio.play().catch(()=>{});
+
+      showAlert(`🚨 OPORTUNIDAD: ${t.name} (${prob}/10)`);
+    }
+  });
+}
+
+function showAlert(msg){
+  const alertBox = document.createElement('div');
+  alertBox.innerText = msg;
+
+  alertBox.style.position = 'fixed';
+  alertBox.style.bottom = '20px';
+  alertBox.style.right = '20px';
+  alertBox.style.background = '#111827';
+  alertBox.style.color = '#60a5fa';
+  alertBox.style.padding = '12px';
+  alertBox.style.borderRadius = '10px';
+  alertBox.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+  alertBox.style.zIndex = 9999;
+
+  document.body.appendChild(alertBox);
+  setTimeout(()=>alertBox.remove(),5000);
+}
+</script>
+
 </body>
 </html>
-
