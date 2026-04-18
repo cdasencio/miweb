@@ -2,57 +2,66 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Detector de Gemas 💎 PRO+ AI Hedge Fund</title>
+<title>DETECTOR PRO+</title>
+
 <style>
 body { font-family: Arial; background:#0b1220; color:#e5e7eb; padding:20px; }
 h1 { color:#60a5fa; }
-.table { width:100%; border-collapse:collapse; margin-top:15px; }
-.table th, .table td { padding:10px; text-align:left; vertical-align:middle; }
-.table tr { border-bottom:1px solid #1f2937; }
-.green { color:#22c55e; }
-.red { color:#ef4444; }
+
 .panel { background:#111827; padding:12px; border-radius:10px; margin-top:10px; }
-.contract { font-size:12px; word-break:break-all; color:#9ca3af; }
-button { padding:8px 10px; border:none; border-radius:8px; background:#60a5fa; cursor:pointer; margin:2px; }
-input, select { padding:8px; border-radius:8px; border:none; width:260px; margin:4px 0; }
+
+.table { width:100%; border-collapse:collapse; margin-top:10px; }
+.table th,.table td { padding:8px; }
+.table tr { border-bottom:1px solid #1f2937; }
+
+.contract { font-size:11px; color:#9ca3af; word-break:break-all; }
+
+button { padding:6px 10px; border:none; border-radius:8px; background:#60a5fa; cursor:pointer; }
+
 .section { margin-top:25px; }
-.topbar { display:flex; gap:10px; margin-bottom:10px; }
-.small { font-size:12px; color:#9ca3af; }
+
+.lang {
+  position:absolute;
+  top:20px;
+  right:20px;
+}
+
 .search-item{padding:8px;border-bottom:1px solid #1f2937;cursor:pointer}
 .search-item:hover{background:#111827}
 </style>
 </head>
+
 <body>
 
-<h1>🚀 Detector de Gemas PRO+ AI Hedge Fund</h1>
+<h1>🚀 DETECTOR PRO+</h1>
 
-<div class="topbar">
-<button onclick="runDetector()">🔄 Actualizar</button>
-<button onclick="toggleAuto()">⚡ Auto</button>
+<div class="lang">
+<select onchange="setLang(this.value)">
+<option value="es">Español</option>
+<option value="en">Inglés</option>
+<option value="pt">Portugués</option>
+<option value="ar">Árabe</option>
+</select>
 </div>
+
+<button onclick="runDetector()">🔄 <span data-t="update">Actualizar</span></button>
+<button onclick="toggleAuto()">⚡ AUTO</button>
 
 <p id="status"></p>
-<div id="topSignal" class="panel">Analizando mercado...</div>
 
-<!-- 🔴 MAXIMA ALERTA -->
+<!-- 🧨 EARLY -->
 <div class="section">
-<h2>🔴 Máxima Alerta (10/10)</h2>
-<div id="maxAlert" class="panel"></div>
+<h2 data-t="early">🧨 Early Gems</h2>
+<div id="pump"></div>
 </div>
 
-<!-- 🔥 OPORTUNIDADES TEMPRANAS -->
+<!-- 📌 WATCHLIST -->
 <div class="section">
-<h2>🔥 Oportunidades tempranas</h2>
-<div id="earlyList" class="panel"></div>
-</div>
+<h2>📌 Watchlist</h2>
 
-<!-- 📌 WATCHLIST + BUSCADOR + SELECTOR -->
-<div class="section">
-<h2>📌 Watchlist + Buscador (DEX Screener Mode PRO)</h2>
-
-<input id="searchInput" placeholder="Buscar token o contrato (ej: PEPE)" />
+<input id="searchInput" placeholder="Buscar token o contrato">
 <button onclick="searchTokens()">Buscar</button>
-<button onclick="clearSearch()">Limpiar búsqueda</button>
+<button onclick="clearSearch()">Limpiar</button>
 
 <div id="searchResults" class="panel"></div>
 
@@ -61,23 +70,41 @@ input, select { padding:8px; border-radius:8px; border:none; width:260px; margin
 <select id="tokenSelect">
 <option value="">🔽 Selecciona un token...</option>
 </select>
-<button onclick="addFromSelect()">Agregar a Watchlist</button>
+<button onclick="addFromSelect()">Agregar</button>
 
 <br><br>
 
-<input id="pinInput" placeholder="Pegar contrato manual (opcional)" />
+<input id="pinInput" placeholder="Pegar contrato manual">
 <button onclick="addPinned()">Pinear</button>
 
-<div id="watchList"></div>
+<div id="watch"></div>
 </div>
 
-<!-- 🌍 RANKING -->
+<!-- 🔴 MAX -->
 <div class="section">
-<h2>🌍 Ranking IA</h2>
+<h2>🔴 Máxima Alerta</h2>
+<div id="max"></div>
+</div>
+
+<!-- 📊 -->
+<div class="section">
+<h2>📊 Seguimiento</h2>
+<div id="early"></div>
+</div>
+
+<!-- 🐋 -->
+<div class="section">
+<h2>🐋 Smart Money</h2>
+<div id="whales"></div>
+</div>
+
+<!-- 🌍 -->
+<div class="section">
+<h2>🌍 Ranking (ordenado por Score según IA)</h2>
 <table class="table">
 <thead>
 <tr>
-<th>Token</th><th>Precio</th><th>24h</th><th>Vol</th><th>Liq</th><th>IA</th><th>Decisión</th><th>Contrato</th><th>Acción</th>
+<th>Token</th><th>Precio</th><th>%</th><th>Vol</th><th>Liq</th><th>Score según IA</th><th>DEX</th><th>Contrato</th><th></th>
 </tr>
 </thead>
 <tbody id="rank"></tbody>
@@ -85,174 +112,165 @@ input, select { padding:8px; border-radius:8px; border:none; width:260px; margin
 </div>
 
 <script>
-let auto=false, interval;
 let tokens=[];
 let pinned=JSON.parse(localStorage.getItem('pinned')||'[]');
+let auto=false, interval;
+const status=document.getElementById('status');
 
-function save(){ localStorage.setItem('pinned',JSON.stringify(pinned)); }
+const T={
+  es:{update:"Actualizar",early:"Early Gems"},
+  en:{update:"Update",early:"Early Gems"},
+  pt:{update:"Atualizar",early:"Early Gems"},
+  ar:{update:"تحديث",early:"فرص مبكرة"}
+};
 
-function score(t){
-  let s=0;
-  if(t.liq>200000) s+=3; else if(t.liq>80000) s+=2; else if(t.liq>30000) s+=1;
-  if(t.vol>200000) s+=3; else if(t.vol>50000) s+=2;
-  if(t.chg>2 && t.chg<20) s+=3;
-  if(t.chg>40) return 0;
-  return Math.min(10,s);
-}
-
-function decision(s){
-  if(s>=9) return '🟢 ENTRAR SEGURO';
-  if(s>=7) return '🔵 SEGUIR';
-  if(s>=5) return '🟡 OBSERVAR';
-  return '❌ DESCARTAR';
-}
-
-async function runDetector(){
-  const status=document.getElementById('status');
-  status.innerText='⏳ Escaneando...';
-
-  try{
-    const res=await fetch('https://api.dexscreener.com/latest/dex/search?q=uniswap');
-    const data=await res.json();
-
-    tokens=(data.pairs||[]).map(t=>{
-      return {
-        name:t.baseToken.symbol,
-        price:t.priceUsd||0,
-        vol:t.volume?.h24||0,
-        liq:t.liquidity?.usd||0,
-        chg:t.priceChange?.h24||0,
-        address:t.baseToken.address,
-        time:new Date().toLocaleString(),
-        ai:score({liq:t.liquidity?.usd||0,vol:t.volume?.h24||0,chg:t.priceChange?.h24||0})
-      };
-    });
-
-    renderMax();
-    renderEarly();
-    renderRank();
-    renderSelect();
-    renderWatch();
-
-    status.innerText='✅ Listo';
-  }catch(e){
-    console.error(e);
-    status.innerText='❌ Error cargando datos';
-  }
-}
-
-function renderMax(){
-  const box=document.getElementById('maxAlert');
-  const list=tokens.filter(t=>t.ai>=9);
-
-  box.innerHTML = list.length ? list.map(t=>`
-    <div>
-      🔥 <b>${t.name}</b> | $${t.price}
-      <div class='small'>🧠 ${t.ai}/10 | ${t.time}</div>
-      <div class='contract'>${t.address}</div>
-    </div>
-  `).join('') : 'Sin señales 9/10';
-}
-
-function renderEarly(){
-  const box=document.getElementById('earlyList');
-  const list=tokens.filter(t=>t.ai>=6 && t.ai<9);
-
-  box.innerHTML = list.length ? list.map(t=>`
-    <div>
-      🚀 <b>${t.name}</b> | $${t.price}
-      <div class='small'>🧠 ${t.ai}/10 | ${t.time}</div>
-      <div class='contract'>${t.address}</div>
-    </div>
-  `).join('') : 'Sin oportunidades tempranas';
-}
-
-function searchTokens(){
-  const q=document.getElementById('searchInput').value.toLowerCase();
-  const res=tokens.filter(t=>t.name.toLowerCase().includes(q)||t.address.toLowerCase().includes(q));
-
-  document.getElementById('searchResults').innerHTML = res.length ? res.map(t=>`
-    <div class='search-item'>
-      <b>${t.name}</b><br>
-      <span class='contract'>${t.address}</span><br>
-      <button onclick="addPinnedDirect('${t.address}')">Pinear</button>
-    </div>
-  `).join('') : 'Sin resultados';
-}
-
-function clearSearch(){
-  document.getElementById('searchInput').value='';
-  document.getElementById('searchResults').innerHTML='';
-}
-
-function renderSelect(){
-  const sel=document.getElementById('tokenSelect');
-  sel.innerHTML='<option value="">🔽 Selecciona un token...</option>';
-
-  tokens.slice(0,100).forEach(t=>{
-    const opt=document.createElement('option');
-    opt.value=t.address;
-    opt.textContent=`${t.name} | IA ${t.ai}/10`;
-    sel.appendChild(opt);
+function setLang(l){
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    el.innerText=T[l][el.dataset.t];
   });
 }
 
-function addFromSelect(){
-  const sel=document.getElementById('tokenSelect');
-  if(!sel.value) return;
-  addPinnedDirect(sel.value);
+function score(t){
+  let s=0;
+  if(t.liq>200000) s+=3;
+  if(t.vol>200000) s+=3;
+  if(t.chg>2 && t.chg<20) s+=3;
+  return Math.min(10,s);
 }
 
-function addPinned(){
-  addPinnedDirect(document.getElementById('pinInput').value.trim());
+function earlyScore(t){
+  let s=0;
+  if(t.liq>1000 && t.liq<80000) s+=3;
+  if(t.vol>2000 && t.vol<100000) s+=2;
+  if(t.chg>5 && t.chg<80) s+=2;
+  if(t.age<12) s+=3;
+  return Math.min(10,s);
 }
 
-function addPinnedDirect(addr){
-  if(!addr || pinned.includes(addr) || pinned.length>=20) return;
-  pinned.push(addr);
-  save();
-  renderWatch();
+function whaleSignal(t){
+  return (t.txns?.h24?.buys||0) > (t.txns?.h24?.sells||0)*1.5;
 }
 
-function removePinned(v){
-  pinned=pinned.filter(p=>p!==v);
-  save();
-  renderWatch();
+async function runDetector(){
+  status.innerText="⏳ Escaneando...";
+
+  const queries=['new pair','fair launch','launch','pump','memecoin','dex new','trending','0x','solana','eth','bsc'];
+  let all=[];
+
+  for(const q of queries){
+    try{
+      let r=await fetch(`https://api.dexscreener.com/latest/dex/search?q=${q}`);
+      let d=await r.json();
+      if(d.pairs) all=all.concat(d.pairs);
+    }catch{}
+  }
+
+  let map=new Map();
+  all.forEach(t=>{
+    if(t.baseToken?.address) map.set(t.baseToken.address,t);
+  });
+
+  tokens=Array.from(map.values()).map(t=>{
+    let liq=t.liquidity?.usd||0;
+    let vol=t.volume?.h24||0;
+    let chg=t.priceChange?.h24||0;
+    let age=t.pairCreatedAt?(Date.now()-t.pairCreatedAt)/3600000:999;
+
+    return{
+      name:t.baseToken.symbol,
+      price:t.priceUsd||0,
+      liq,vol,chg,age,
+      address:t.baseToken.address,
+      dex:t.dexId||'N/A',
+      txns:t.txns,
+      ai:score({liq,vol,chg}),
+      early:earlyScore({liq,vol,chg,age}),
+      whale:whaleSignal(t)
+    };
+  });
+
+  render();
+  status.innerText="✅ Datos cargados";
 }
 
-function renderWatch(){
-  const box=document.getElementById('watchList');
-  const list=tokens.filter(t=>pinned.includes(t.address));
+function render(){
 
-  box.innerHTML=list.map(t=>`
-    <div class='panel'>
-      <b>${t.name}</b><br>
-      💰 $${t.price}<br>
-      📊 ${t.chg}%<br>
-      📦 ${t.vol}<br>
-      💧 ${t.liq}<br>
-      🧠 ${t.ai}/10<br>
-      <div class='contract'>${t.address}</div><br>
-      <button onclick="removePinned('${t.address}')">Despinear</button>
-    </div>
-  `).join('');
-}
+  pump.innerHTML=tokens.filter(t=>t.early>=4)
+    .sort((a,b)=>b.early-a.early)
+    .slice(0,30)
+    .map(t=>card(t)).join('');
 
-function renderRank(){
-  const box=document.getElementById('rank');
-  box.innerHTML=tokens.sort((a,b)=>b.ai-a.ai).map(t=>`
+  max.innerHTML=tokens.filter(t=>t.ai>=9)
+    .map(t=>card(t)).join('');
+
+  early.innerHTML=tokens.filter(t=>t.ai>=6 && t.ai<9)
+    .map(t=>card(t)).join('');
+
+  whales.innerHTML=tokens.filter(t=>t.whale)
+    .map(t=>card(t)).join('');
+
+  watch.innerHTML=pinned.map(addr=>{
+    let t=tokens.find(x=>x.address===addr);
+    return t?card(t,true):`<div class="panel">${addr}</div>`;
+  }).join('');
+
+  tokenSelect.innerHTML='';
+  tokens.slice(0,50).forEach(t=>{
+    let o=document.createElement('option');
+    o.value=t.address;
+    o.textContent=t.name;
+    tokenSelect.appendChild(o);
+  });
+
+  rank.innerHTML=tokens.sort((a,b)=>b.ai-a.ai).slice(0,50).map(t=>`
     <tr>
       <td>${t.name}</td>
       <td>$${t.price}</td>
-      <td class='${t.chg>=0?'green':'red'}'>${t.chg}%</td>
+      <td>${t.chg}%</td>
       <td>${t.vol}</td>
       <td>${t.liq}</td>
       <td>${t.ai}/10</td>
-      <td>${decision(t.ai)}</td>
-      <td class='contract'>${t.address}</td>
-      <td><button onclick="addPinnedDirect('${t.address}')">Pinear</button></td>
+      <td>${t.dex}</td>
+      <td class="contract">${t.address}</td>
+      <td><button onclick="pin('${t.address}')">📌</button></td>
     </tr>
   `).join('');
+}
+
+function card(t,remove=false){
+  return `<div class="panel">
+    <b>${t.name}</b> ${t.whale?'🐋':''}<br>
+    $${t.price}<br>
+    ${t.chg}%<br>
+    Score según IA: ${t.ai}/10<br>
+    Early: ${t.early}/10<br>
+    Vol: ${t.vol} | Liq: ${t.liq}<br>
+    <div class="contract">${t.address}</div>
+    ${remove?`<button onclick="removePin('${t.address}')">❌</button>`:`<button onclick="pin('${t.address}')">📌</button>`}
+  </div>`;
+}
+
+function searchTokens(){
+  let q=searchInput.value.toLowerCase();
+  searchResults.innerHTML=tokens.filter(t=>t.name.toLowerCase().includes(q)||t.address.toLowerCase().includes(q)).map(t=>card(t)).join('');
+}
+
+function clearSearch(){searchInput.value='';searchResults.innerHTML='';}
+
+function addFromSelect(){if(tokenSelect.value) pin(tokenSelect.value);}
+
+function addPinned(){let v=pinInput.value.trim();if(v) pin(v);}
+
+function pin(a){
+  if(!pinned.includes(a)) pinned.push(a);
+  localStorage.setItem('pinned',JSON.stringify(pinned));
+  render();
+}
+
+function removePin(a){
+  pinned=pinned.filter(x=>x!==a);
+  localStorage.setItem('pinned',JSON.stringify(pinned));
+  render();
 }
 
 function toggleAuto(){
@@ -260,7 +278,7 @@ function toggleAuto(){
   if(auto){runDetector();interval=setInterval(runDetector,15000);}else clearInterval(interval);
 }
 
-window.onload=runDetector;
+runDetector();
 </script>
 
 </body>
