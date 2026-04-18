@@ -19,15 +19,7 @@ h1 { color:#60a5fa; }
 button { padding:6px 10px; border:none; border-radius:8px; background:#60a5fa; cursor:pointer; }
 
 .section { margin-top:25px; }
-
-.lang {
-  position:absolute;
-  top:20px;
-  right:20px;
-}
-
-.search-item{padding:8px;border-bottom:1px solid #1f2937;cursor:pointer}
-.search-item:hover{background:#111827}
+.lang { position:absolute; top:20px; right:20px; }
 </style>
 </head>
 
@@ -35,8 +27,9 @@ button { padding:6px 10px; border:none; border-radius:8px; background:#60a5fa; c
 
 <h1>🚀 DETECTOR PRO+</h1>
 
+<!-- 🌐 IDIOMAS -->
 <div class="lang">
-<select onchange="setLang(this.value)">
+<select id="langSelect">
 <option value="es">Español</option>
 <option value="en">Inglés</option>
 <option value="pt">Portugués</option>
@@ -44,20 +37,23 @@ button { padding:6px 10px; border:none; border-radius:8px; background:#60a5fa; c
 </select>
 </div>
 
-<button onclick="runDetector()">🔄 <span data-t="update">Actualizar</span></button>
+<button id="btnUpdate" onclick="runDetector()">🔄 Actualizar</button>
 <button onclick="toggleAuto()">⚡ AUTO</button>
 
 <p id="status"></p>
 
-<!-- 🧨 EARLY -->
 <div class="section">
-<h2 data-t="early">🧨 Early Gems</h2>
+<h2 id="titleEarly">🧨 Early Gems</h2>
 <div id="pump"></div>
 </div>
 
-<!-- 📌 WATCHLIST -->
 <div class="section">
-<h2>📌 Watchlist</h2>
+<h2>💎 Micro Gems (ultra temprano) ⚠️ ALTO RIESGO</h2>
+<div id="micro"></div>
+</div>
+
+<div class="section">
+<h2 id="titleWatch">📌 Watchlist</h2>
 
 <input id="searchInput" placeholder="Buscar token o contrato">
 <button onclick="searchTokens()">Buscar</button>
@@ -67,9 +63,7 @@ button { padding:6px 10px; border:none; border-radius:8px; background:#60a5fa; c
 
 <br><br>
 
-<select id="tokenSelect">
-<option value="">🔽 Selecciona un token...</option>
-</select>
+<select id="tokenSelect"></select>
 <button onclick="addFromSelect()">Agregar</button>
 
 <br><br>
@@ -80,31 +74,28 @@ button { padding:6px 10px; border:none; border-radius:8px; background:#60a5fa; c
 <div id="watch"></div>
 </div>
 
-<!-- 🔴 MAX -->
 <div class="section">
-<h2>🔴 Máxima Alerta</h2>
+<h2 id="titleMax">🔴 Máxima Alerta</h2>
 <div id="max"></div>
 </div>
 
-<!-- 📊 -->
 <div class="section">
-<h2>📊 Seguimiento</h2>
+<h2 id="titleTracking">📊 Seguimiento</h2>
 <div id="early"></div>
 </div>
 
-<!-- 🐋 -->
 <div class="section">
-<h2>🐋 Smart Money</h2>
+<h2 id="titleWhales">🐋 Smart Money</h2>
 <div id="whales"></div>
 </div>
 
-<!-- 🌍 -->
 <div class="section">
-<h2>🌍 Ranking (ordenado por Score según IA)</h2>
+<h2 id="titleRanking">🌍 Ranking</h2>
 <table class="table">
 <thead>
 <tr>
-<th>Token</th><th>Precio</th><th>%</th><th>Vol</th><th>Liq</th><th>Score según IA</th><th>DEX</th><th>Contrato</th><th></th>
+<th>Token</th><th>Precio</th><th>%</th><th>Vol</th><th>Liq</th>
+<th>Score IA</th><th>Early</th><th>Señal</th><th>DEX</th><th>Contrato</th><th></th>
 </tr>
 </thead>
 <tbody id="rank"></tbody>
@@ -115,151 +106,194 @@ button { padding:6px 10px; border:none; border-radius:8px; background:#60a5fa; c
 let tokens=[];
 let pinned=JSON.parse(localStorage.getItem('pinned')||'[]');
 let auto=false, interval;
-const status=document.getElementById('status');
 
-const T={
-  es:{update:"Actualizar",early:"Early Gems"},
-  en:{update:"Update",early:"Early Gems"},
-  pt:{update:"Atualizar",early:"Early Gems"},
-  ar:{update:"تحديث",early:"فرص مبكرة"}
+const el={
+  status:document.getElementById('status'),
+  pump:document.getElementById('pump'),
+  micro:document.getElementById('micro'),
+  max:document.getElementById('max'),
+  early:document.getElementById('early'),
+  whales:document.getElementById('whales'),
+  watch:document.getElementById('watch'),
+  rank:document.getElementById('rank'),
+  tokenSelect:document.getElementById('tokenSelect'),
+  searchResults:document.getElementById('searchResults'),
+  searchInput:document.getElementById('searchInput'),
+  pinInput:document.getElementById('pinInput')
 };
 
-function setLang(l){
-  document.querySelectorAll('[data-t]').forEach(el=>{
-    el.innerText=T[l][el.dataset.t];
-  });
+function cleanText(t){
+  return (t||'').replace(/[<>]/g,'').slice(0,20);
 }
 
 function score(t){
   let s=0;
-  if(t.liq>200000) s+=3;
-  if(t.vol>200000) s+=3;
-  if(t.chg>2 && t.chg<20) s+=3;
+  if(t.liq>10000) s+=3;
+  if(t.vol>10000) s+=3;
+  if(Math.abs(t.chg)>2 && Math.abs(t.chg)<80) s+=2;
+  if(t.age<24) s+=2;
   return Math.min(10,s);
+}
+
+function decision(s){
+  if(s<=2) return "❌ NULO";
+  if(s<=4) return "⛔ NO ENTRAR";
+  if(s<=6) return "👀 OBSERVAR";
+  if(s<=8) return "🟡 ENTRAR";
+  return "🟢 ENTRADA";
 }
 
 function earlyScore(t){
   let s=0;
-  if(t.liq>1000 && t.liq<80000) s+=3;
-  if(t.vol>2000 && t.vol<100000) s+=2;
-  if(t.chg>5 && t.chg<80) s+=2;
-  if(t.age<12) s+=3;
+  if(t.liq>2000 && t.liq<100000) s+=3;
+  if(t.vol>3000) s+=2;
+  if(t.chg>5) s+=2;
+  if(t.age<6) s+=3;
   return Math.min(10,s);
 }
 
-function whaleSignal(t){
-  return (t.txns?.h24?.buys||0) > (t.txns?.h24?.sells||0)*1.5;
+function microScore(t){
+  let s=0;
+  if(t.liq>1000 && t.liq<30000) s+=3;
+  if(t.vol>2000) s+=2;
+  if(t.chg>3) s+=2;
+  if(t.age<3) s+=3;
+  return Math.min(10,s);
+}
+
+function whale(t){
+  let b=t.txns?.h24?.buys||0;
+  let s=t.txns?.h24?.sells||0;
+  return b>s*1.5;
 }
 
 async function runDetector(){
-  status.innerText="⏳ Escaneando...";
+  el.status.innerText="Escaneando...";
 
-  const queries=['new pair','fair launch','launch','pump','memecoin','dex new','trending','0x','solana','eth','bsc'];
+  let queries=['new','pump','launch','memecoin','trending'];
   let all=[];
 
-  for(const q of queries){
+  for(let q of queries){
     try{
       let r=await fetch(`https://api.dexscreener.com/latest/dex/search?q=${q}`);
       let d=await r.json();
-      if(d.pairs) all=all.concat(d.pairs);
+      if(d.pairs) all.push(...d.pairs);
     }catch{}
   }
 
   let map=new Map();
+
   all.forEach(t=>{
-    if(t.baseToken?.address) map.set(t.baseToken.address,t);
+    if(t.baseToken?.address && t.baseToken.symbol?.length<20){
+      map.set(t.baseToken.address,t);
+    }
   });
 
-  tokens=Array.from(map.values()).map(t=>{
+  tokens=[...map.values()].map(t=>{
     let liq=t.liquidity?.usd||0;
     let vol=t.volume?.h24||0;
     let chg=t.priceChange?.h24||0;
     let age=t.pairCreatedAt?(Date.now()-t.pairCreatedAt)/3600000:999;
 
     return{
-      name:t.baseToken.symbol,
+      name:cleanText(t.baseToken.symbol),
       price:t.priceUsd||0,
       liq,vol,chg,age,
       address:t.baseToken.address,
       dex:t.dexId||'N/A',
       txns:t.txns,
-      ai:score({liq,vol,chg}),
+      ai:score({liq,vol,chg,age}),
       early:earlyScore({liq,vol,chg,age}),
-      whale:whaleSignal(t)
+      micro:microScore({liq,vol,chg,age}),
+      whale:whale(t)
     };
   });
 
   render();
-  status.innerText="✅ Datos cargados";
+  el.status.innerText="Listo";
 }
 
 function render(){
+  let sorted=[...tokens].sort((a,b)=>{
+    if(b.ai>=9 && a.ai<9) return 1;
+    if(a.ai>=9 && b.ai<9) return -1;
+    return b.ai-a.ai;
+  });
 
-  pump.innerHTML=tokens.filter(t=>t.early>=4)
-    .sort((a,b)=>b.early-a.early)
+  el.pump.innerHTML=sorted.filter(t=>t.early>=4).map(card).join('');
+
+  el.micro.innerHTML=sorted
+    .filter(t=>t.micro>=5)
     .slice(0,30)
-    .map(t=>card(t)).join('');
+    .map(t=>card(t)+"<div style='color:#f87171'>⚠️ ALTO RIESGO</div>")
+    .join('');
 
-  max.innerHTML=tokens.filter(t=>t.ai>=9)
-    .map(t=>card(t)).join('');
+  el.max.innerHTML=sorted.filter(t=>t.ai>=8).map(card).join('');
+  el.early.innerHTML=sorted.filter(t=>t.ai>=6 && t.ai<8).map(card).join('');
+  el.whales.innerHTML=sorted.filter(t=>t.whale).map(card).join('');
 
-  early.innerHTML=tokens.filter(t=>t.ai>=6 && t.ai<9)
-    .map(t=>card(t)).join('');
-
-  whales.innerHTML=tokens.filter(t=>t.whale)
-    .map(t=>card(t)).join('');
-
-  watch.innerHTML=pinned.map(addr=>{
-    let t=tokens.find(x=>x.address===addr);
-    return t?card(t,true):`<div class="panel">${addr}</div>`;
+  el.watch.innerHTML=pinned.map(a=>{
+    let t=tokens.find(x=>x.address===a);
+    return t?card(t,true):'';
   }).join('');
 
-  tokenSelect.innerHTML='';
+  el.tokenSelect.innerHTML='<option>Selecciona...</option>';
   tokens.slice(0,50).forEach(t=>{
     let o=document.createElement('option');
     o.value=t.address;
     o.textContent=t.name;
-    tokenSelect.appendChild(o);
+    el.tokenSelect.appendChild(o);
   });
 
-  rank.innerHTML=tokens.sort((a,b)=>b.ai-a.ai).slice(0,50).map(t=>`
-    <tr>
-      <td>${t.name}</td>
-      <td>$${t.price}</td>
-      <td>${t.chg}%</td>
-      <td>${t.vol}</td>
-      <td>${t.liq}</td>
-      <td>${t.ai}/10</td>
-      <td>${t.dex}</td>
-      <td class="contract">${t.address}</td>
-      <td><button onclick="pin('${t.address}')">📌</button></td>
-    </tr>
-  `).join('');
+  el.rank.innerHTML=sorted.slice(0,50).map(t=>`
+  <tr>
+    <td>${t.name}</td>
+    <td>$${t.price}</td>
+    <td>${t.chg}%</td>
+    <td>${t.vol}</td>
+    <td>${t.liq}</td>
+    <td>${t.ai}/10</td>
+    <td>${t.early}/10</td>
+    <td>${decision(t.ai)}</td>
+    <td>${t.dex}</td>
+    <td class="contract">${t.address}</td>
+    <td><button onclick="pin('${t.address}')">📌</button></td>
+  </tr>`).join('');
 }
 
-function card(t,remove=false){
+function card(t){
+  let isPinned=pinned.includes(t.address);
+
   return `<div class="panel">
-    <b>${t.name}</b> ${t.whale?'🐋':''}<br>
-    $${t.price}<br>
-    ${t.chg}%<br>
-    Score según IA: ${t.ai}/10<br>
-    Early: ${t.early}/10<br>
-    Vol: ${t.vol} | Liq: ${t.liq}<br>
-    <div class="contract">${t.address}</div>
-    ${remove?`<button onclick="removePin('${t.address}')">❌</button>`:`<button onclick="pin('${t.address}')">📌</button>`}
+  <b>${t.name}</b> ${t.whale?'🐋':''}<br>
+  💲 ${t.price}<br>
+  📈 ${t.chg}%<br>
+  🤖 Score IA: ${t.ai}/10<br>
+  🚀 Early: ${t.early}/10<br>
+  ${decision(t.ai)}<br>
+  💧 Vol: ${t.vol} | Liq: ${t.liq}<br>
+  <div class="contract">${t.address}</div>
+  ${isPinned
+    ? `<button onclick="removePin('${t.address}')">❌</button>`
+    : `<button onclick="pin('${t.address}')">📌</button>`
+  }
   </div>`;
 }
 
 function searchTokens(){
-  let q=searchInput.value.toLowerCase();
-  searchResults.innerHTML=tokens.filter(t=>t.name.toLowerCase().includes(q)||t.address.toLowerCase().includes(q)).map(t=>card(t)).join('');
+  let q=el.searchInput.value.toLowerCase();
+  el.searchResults.innerHTML=tokens.filter(t=>
+    t.name.toLowerCase().includes(q)||t.address.toLowerCase().includes(q)
+  ).map(card).join('');
 }
 
-function clearSearch(){searchInput.value='';searchResults.innerHTML='';}
+function clearSearch(){
+  el.searchInput.value='';
+  el.searchResults.innerHTML='';
+}
 
-function addFromSelect(){if(tokenSelect.value) pin(tokenSelect.value);}
-
-function addPinned(){let v=pinInput.value.trim();if(v) pin(v);}
+function addFromSelect(){ if(el.tokenSelect.value) pin(el.tokenSelect.value); }
+function addPinned(){ let v=el.pinInput.value.trim(); if(v) pin(v); }
 
 function pin(a){
   if(!pinned.includes(a)) pinned.push(a);
@@ -275,10 +309,31 @@ function removePin(a){
 
 function toggleAuto(){
   auto=!auto;
-  if(auto){runDetector();interval=setInterval(runDetector,15000);}else clearInterval(interval);
+  if(auto){runDetector(); interval=setInterval(runDetector,15000);}
+  else clearInterval(interval);
 }
 
 runDetector();
+
+/* 🌐 IDIOMAS */
+const translations={
+  es:{update:"Actualizar",early:"Early Gems",watch:"Watchlist",max:"Máxima Alerta",tracking:"Seguimiento",whales:"Smart Money",ranking:"Ranking"},
+  en:{update:"Update",early:"Early Gems",watch:"Watchlist",max:"Max Alert",tracking:"Tracking",whales:"Smart Money",ranking:"Ranking"},
+  pt:{update:"Atualizar",early:"Early Gems",watch:"Watchlist",max:"Alerta Máxima",tracking:"Seguimento",whales:"Smart Money",ranking:"Ranking"},
+  ar:{update:"تحديث",early:"فرص مبكرة",watch:"قائمة المراقبة",max:"تنبيه عالي",tracking:"متابعة",whales:"أموال ذكية",ranking:"تصنيف"}
+};
+
+document.getElementById("langSelect").addEventListener("change", function(){
+  const t=translations[this.value];
+
+  document.getElementById("btnUpdate").innerText="🔄 "+t.update;
+  document.getElementById("titleEarly").innerText="🧨 "+t.early;
+  document.getElementById("titleWatch").innerText="📌 "+t.watch;
+  document.getElementById("titleMax").innerText="🔴 "+t.max;
+  document.getElementById("titleTracking").innerText="📊 "+t.tracking;
+  document.getElementById("titleWhales").innerText="🐋 "+t.whales;
+  document.getElementById("titleRanking").innerText="🌍 "+t.ranking;
+});
 </script>
 
 </body>
