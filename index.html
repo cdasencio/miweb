@@ -1,340 +1,269 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>DETECTOR PRO+</title>
-
-<style>
-body { font-family: Arial; background:#0b1220; color:#e5e7eb; padding:20px; }
-h1 { color:#60a5fa; }
-
-.panel { background:#111827; padding:12px; border-radius:10px; margin-top:10px; }
-
-.table { width:100%; border-collapse:collapse; margin-top:10px; }
-.table th,.table td { padding:8px; }
-.table tr { border-bottom:1px solid #1f2937; }
-
-.contract { font-size:11px; color:#9ca3af; word-break:break-all; }
-
-button { padding:6px 10px; border:none; border-radius:8px; background:#60a5fa; cursor:pointer; }
-
-.section { margin-top:25px; }
-.lang { position:absolute; top:20px; right:20px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mastering Call Flow</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            gap: 30px;
+            min-height: 80vh;
+            height: auto;
+        }
+        .panel {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .interactive-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        h1 {
+            color: #6b7280;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            font-weight: 600;
+        }
+        .list-item-container, .static-item-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .list-item, .static-item {
+            padding: 12px 15px;
+            border-radius: 6px;
+            background-color: #f8fafc;
+            border-left: 4px solid #94a3b8;
+            flex-grow: 1;
+        }
+        .list-item {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .list-item:hover {
+            background-color: #e2e8f0;
+        }
+        .list-item.active {
+            font-weight: bold;
+            background-color: #e2e8f0;
+            border-left: 4px solid #64748b;
+        }
+        .item-tag {
+            background-color: #f8fafc;
+            border-left: 4px solid #94a3b8;
+            padding: 12px 10px;
+            border-radius: 6px;
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #475569;
+            height: auto;
+        }
+        .nested-item {
+            margin-left: 20px;
+            margin-bottom: 10px;
+            padding-left: 10px;
+            border-left: 2px solid #e5e7eb;
+        }
+        .reset-button {
+            background-color: #d1d5db;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            align-self: center;
+            position: sticky;
+            bottom: 25px;
+        }
+        .reset-button:hover {
+            background-color: #9ca3af;
+        }
+        .selection-count {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #64748b;
+            font-size: 1.2rem;
+        }
+        .timer-container {
+            width: 2cm;
+            height: 2cm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 10px auto;
+            border-radius: 6px;
+            background: #f8fafc;
+            border: 2px solid #d1d5db;
+            cursor: pointer;
+        }
+        .timer-display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: monospace;
+        }
+        .timer-label {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .timer-critical {
+            animation: blinker 1s linear infinite;
+            color: #dc2626;
+        }
+        .important-item {
+            text-align: center;
+            cursor: pointer;
+        }
+        @keyframes blinker {
+            50% { opacity: 0.5; }
+        }
+    </style>
 </head>
-
 <body>
-
-<h1>🚀 DETECTOR PRO+</h1>
-
-<!-- 🌐 IDIOMAS -->
-<div class="lang">
-<select id="langSelect">
-<option value="es">Español</option>
-<option value="en">Inglés</option>
-<option value="pt">Portugués</option>
-<option value="ar">Árabe</option>
-</select>
-</div>
-
-<button id="btnUpdate" onclick="runDetector()">🔄 Actualizar</button>
-<button onclick="toggleAuto()">⚡ AUTO</button>
-
-<p id="status"></p>
-
-<div class="section">
-<h2 id="titleEarly">🧨 Early Gems</h2>
-<div id="pump"></div>
-</div>
-
-<div class="section">
-<h2>💎 Micro Gems (ultra temprano) ⚠️ ALTO RIESGO</h2>
-<div id="micro"></div>
-</div>
-
-<div class="section">
-<h2 id="titleWatch">📌 Watchlist</h2>
-
-<input id="searchInput" placeholder="Buscar token o contrato">
-<button onclick="searchTokens()">Buscar</button>
-<button onclick="clearSearch()">Limpiar</button>
-
-<div id="searchResults" class="panel"></div>
-
-<br><br>
-
-<select id="tokenSelect"></select>
-<button onclick="addFromSelect()">Agregar</button>
-
-<br><br>
-
-<input id="pinInput" placeholder="Pegar contrato manual">
-<button onclick="addPinned()">Pinear</button>
-
-<div id="watch"></div>
-</div>
-
-<div class="section">
-<h2 id="titleMax">🔴 Máxima Alerta</h2>
-<div id="max"></div>
-</div>
-
-<div class="section">
-<h2 id="titleTracking">📊 Seguimiento</h2>
-<div id="early"></div>
-</div>
-
-<div class="section">
-<h2 id="titleWhales">🐋 Smart Money</h2>
-<div id="whales"></div>
-</div>
-
-<div class="section">
-<h2 id="titleRanking">🌍 Ranking</h2>
-<table class="table">
-<thead>
-<tr>
-<th>Token</th><th>Precio</th><th>%</th><th>Vol</th><th>Liq</th>
-<th>Score IA</th><th>Early</th><th>Señal</th><th>DEX</th><th>Contrato</th><th></th>
-</tr>
-</thead>
-<tbody id="rank"></tbody>
-</table>
-</div>
-
-<script>
-let tokens=[];
-let pinned=JSON.parse(localStorage.getItem('pinned')||'[]');
-let auto=false, interval;
-
-const el={
-  status:document.getElementById('status'),
-  pump:document.getElementById('pump'),
-  micro:document.getElementById('micro'),
-  max:document.getElementById('max'),
-  early:document.getElementById('early'),
-  whales:document.getElementById('whales'),
-  watch:document.getElementById('watch'),
-  rank:document.getElementById('rank'),
-  tokenSelect:document.getElementById('tokenSelect'),
-  searchResults:document.getElementById('searchResults'),
-  searchInput:document.getElementById('searchInput'),
-  pinInput:document.getElementById('pinInput')
-};
-
-function cleanText(t){
-  return (t||'').replace(/[<>]/g,'').slice(0,20);
-}
-
-function score(t){
-  let s=0;
-  if(t.liq>10000) s+=3;
-  if(t.vol>10000) s+=3;
-  if(Math.abs(t.chg)>2 && Math.abs(t.chg)<80) s+=2;
-  if(t.age<24) s+=2;
-  return Math.min(10,s);
-}
-
-function decision(s){
-  if(s<=2) return "❌ NULO";
-  if(s<=4) return "⛔ NO ENTRAR";
-  if(s<=6) return "👀 OBSERVAR";
-  if(s<=8) return "🟡 ENTRAR";
-  return "🟢 ENTRADA";
-}
-
-function earlyScore(t){
-  let s=0;
-  if(t.liq>2000 && t.liq<100000) s+=3;
-  if(t.vol>3000) s+=2;
-  if(t.chg>5) s+=2;
-  if(t.age<6) s+=3;
-  return Math.min(10,s);
-}
-
-function microScore(t){
-  let s=0;
-  if(t.liq>1000 && t.liq<30000) s+=3;
-  if(t.vol>2000) s+=2;
-  if(t.chg>3) s+=2;
-  if(t.age<3) s+=3;
-  return Math.min(10,s);
-}
-
-function whale(t){
-  let b=t.txns?.h24?.buys||0;
-  let s=t.txns?.h24?.sells||0;
-  return b>s*1.5;
-}
-
-async function runDetector(){
-  el.status.innerText="Escaneando...";
-
-  let queries=['new','pump','launch','memecoin','trending'];
-  let all=[];
-
-  for(let q of queries){
-    try{
-      let r=await fetch(`https://api.dexscreener.com/latest/dex/search?q=${q}`);
-      let d=await r.json();
-      if(d.pairs) all.push(...d.pairs);
-    }catch{}
-  }
-
-  let map=new Map();
-
-  all.forEach(t=>{
-    if(t.baseToken?.address && t.baseToken.symbol?.length<20){
-      map.set(t.baseToken.address,t);
-    }
-  });
-
-  tokens=[...map.values()].map(t=>{
-    let liq=t.liquidity?.usd||0;
-    let vol=t.volume?.h24||0;
-    let chg=t.priceChange?.h24||0;
-    let age=t.pairCreatedAt?(Date.now()-t.pairCreatedAt)/3600000:999;
-
-    return{
-      name:cleanText(t.baseToken.symbol),
-      price:t.priceUsd||0,
-      liq,vol,chg,age,
-      address:t.baseToken.address,
-      dex:t.dexId||'N/A',
-      txns:t.txns,
-      ai:score({liq,vol,chg,age}),
-      early:earlyScore({liq,vol,chg,age}),
-      micro:microScore({liq,vol,chg,age}),
-      whale:whale(t)
-    };
-  });
-
-  render();
-  el.status.innerText="Listo";
-}
-
-function render(){
-  let sorted=[...tokens].sort((a,b)=>{
-    if(b.ai>=9 && a.ai<9) return 1;
-    if(a.ai>=9 && b.ai<9) return -1;
-    return b.ai-a.ai;
-  });
-
-  el.pump.innerHTML=sorted.filter(t=>t.early>=4).map(card).join('');
-
-  el.micro.innerHTML=sorted
-    .filter(t=>t.micro>=5)
-    .slice(0,30)
-    .map(t=>card(t)+"<div style='color:#f87171'>⚠️ ALTO RIESGO</div>")
-    .join('');
-
-  el.max.innerHTML=sorted.filter(t=>t.ai>=8).map(card).join('');
-  el.early.innerHTML=sorted.filter(t=>t.ai>=6 && t.ai<8).map(card).join('');
-  el.whales.innerHTML=sorted.filter(t=>t.whale).map(card).join('');
-
-  el.watch.innerHTML=pinned.map(a=>{
-    let t=tokens.find(x=>x.address===a);
-    return t?card(t,true):'';
-  }).join('');
-
-  el.tokenSelect.innerHTML='<option>Selecciona...</option>';
-  tokens.slice(0,50).forEach(t=>{
-    let o=document.createElement('option');
-    o.value=t.address;
-    o.textContent=t.name;
-    el.tokenSelect.appendChild(o);
-  });
-
-  el.rank.innerHTML=sorted.slice(0,50).map(t=>`
-  <tr>
-    <td>${t.name}</td>
-    <td>$${t.price}</td>
-    <td>${t.chg}%</td>
-    <td>${t.vol}</td>
-    <td>${t.liq}</td>
-    <td>${t.ai}/10</td>
-    <td>${t.early}/10</td>
-    <td>${decision(t.ai)}</td>
-    <td>${t.dex}</td>
-    <td class="contract">${t.address}</td>
-    <td><button onclick="pin('${t.address}')">📌</button></td>
-  </tr>`).join('');
-}
-
-function card(t){
-  let isPinned=pinned.includes(t.address);
-
-  return `<div class="panel">
-  <b>${t.name}</b> ${t.whale?'🐋':''}<br>
-  💲 ${t.price}<br>
-  📈 ${t.chg}%<br>
-  🤖 Score IA: ${t.ai}/10<br>
-  🚀 Early: ${t.early}/10<br>
-  ${decision(t.ai)}<br>
-  💧 Vol: ${t.vol} | Liq: ${t.liq}<br>
-  <div class="contract">${t.address}</div>
-  ${isPinned
-    ? `<button onclick="removePin('${t.address}')">❌</button>`
-    : `<button onclick="pin('${t.address}')">📌</button>`
-  }
-  </div>`;
-}
-
-function searchTokens(){
-  let q=el.searchInput.value.toLowerCase();
-  el.searchResults.innerHTML=tokens.filter(t=>
-    t.name.toLowerCase().includes(q)||t.address.toLowerCase().includes(q)
-  ).map(card).join('');
-}
-
-function clearSearch(){
-  el.searchInput.value='';
-  el.searchResults.innerHTML='';
-}
-
-function addFromSelect(){ if(el.tokenSelect.value) pin(el.tokenSelect.value); }
-function addPinned(){ let v=el.pinInput.value.trim(); if(v) pin(v); }
-
-function pin(a){
-  if(!pinned.includes(a)) pinned.push(a);
-  localStorage.setItem('pinned',JSON.stringify(pinned));
-  render();
-}
-
-function removePin(a){
-  pinned=pinned.filter(x=>x!==a);
-  localStorage.setItem('pinned',JSON.stringify(pinned));
-  render();
-}
-
-function toggleAuto(){
-  auto=!auto;
-  if(auto){runDetector(); interval=setInterval(runDetector,15000);}
-  else clearInterval(interval);
-}
-
-runDetector();
-
-/* 🌐 IDIOMAS */
-const translations={
-  es:{update:"Actualizar",early:"Early Gems",watch:"Watchlist",max:"Máxima Alerta",tracking:"Seguimiento",whales:"Smart Money",ranking:"Ranking"},
-  en:{update:"Update",early:"Early Gems",watch:"Watchlist",max:"Max Alert",tracking:"Tracking",whales:"Smart Money",ranking:"Ranking"},
-  pt:{update:"Atualizar",early:"Early Gems",watch:"Watchlist",max:"Alerta Máxima",tracking:"Seguimento",whales:"Smart Money",ranking:"Ranking"},
-  ar:{update:"تحديث",early:"فرص مبكرة",watch:"قائمة المراقبة",max:"تنبيه عالي",tracking:"متابعة",whales:"أموال ذكية",ranking:"تصنيف"}
-};
-
-document.getElementById("langSelect").addEventListener("change", function(){
-  const t=translations[this.value];
-
-  document.getElementById("btnUpdate").innerText="🔄 "+t.update;
-  document.getElementById("titleEarly").innerText="🧨 "+t.early;
-  document.getElementById("titleWatch").innerText="📌 "+t.watch;
-  document.getElementById("titleMax").innerText="🔴 "+t.max;
-  document.getElementById("titleTracking").innerText="📊 "+t.tracking;
-  document.getElementById("titleWhales").innerText="🐋 "+t.whales;
-  document.getElementById("titleRanking").innerText="🌍 "+t.ranking;
-});
-</script>
-
+    <div class="container">
+        <div class="panel">
+            <h1>MASTERING CALL FLOW AND PHONE ETIQUETTE BY STEPS</h1>
+            <div class="interactive-list">
+                <div class="list-item-container"> <div class="list-item">CASE NUMBER // NUMÉRO DE CAS</div> </div>
+                <div class="list-item-container"> <div class="list-item">YOU MUST UPDATE CALL CLASSIFICATION // SAISIR LES INFORMATIONS POUR LA CLASSIFICATION DES APPELS</div> </div>
+                <div class="list-item-container"> <div class="list-item">NAME // NOM</div> </div>
+                <div class="list-item-container"> <div class="list-item">CALL BACK // NUMÉRO DE RAPPEL</div> </div>
+                <div class="list-item-container"> <div class="list-item">EMAIL // ADRESSE COURRIEL</div> </div>
+                <div class="list-item-container"> <div class="list-item">ISSUE // TROUBLE : EMPATHY // EMPATHIE. REVIEW PAPER WORK</div> </div>
+                <div class="list-item-container"> <div class="list-item">HOLD // EN ATTENTE</div> </div>
+                <div class="timer-container" id="timer-container">
+                    <div class="timer-display" id="timer">00:00</div>
+                    <div class="timer-label">Click to Start/Reset</div>
+                </div>
+                <div class="list-item-container"> <div class="list-item">PROVIDE CASE NUMBER // DONNER NUMÉRO DE BILLET</div> </div>
+                <div class="list-item-container"> <div class="list-item">ANYTHING ELSE? // UNE AUTRE CHOSE ?</div> </div>
+                <div class="list-item-container"> <div class="list-item important-item">I CONFIRM I'VE CLASSIFIED THIS CALL AS THIS IS MANDATORY</div> </div>
+            </div>
+            <div class="selection-count"><span id="count"></span></div>
+            <button class="reset-button">RESET</button>
+        </div>
+        <div class="panel">
+            <h1 style="visibility: hidden;">Espaciador</h1>
+            <div class="static-content">
+                <div class="static-item-container"> <div class="static-item">Is there already any case number? // Est-ce qu'il y a déjà un numéro de cas ?</div> </div>
+                <div class="static-item-container"> <div class="static-item">May I know your name? // Quel est votre nom ?</div> </div>
+                <div class="static-item-container"> <div class="static-item">Can you provide me with your best call back number? // Quel est votre meilleur numéro de rappel ?</div> </div>
+                <div class="static-item-container"> <div class="static-item">Can you please confirm your email? // Quel est votre adresse courriel ?</div> </div>
+                <div class="static-item-container"> <div class="static-item">Issue // Trouble :</div> </div>
+                <div class="nested-item"> <div class="static-item">I really apologize for that // Je m'excuse vraiment pour ça</div> </div>
+                <div class="nested-item"> <div class="static-item">I know how that feels, I'm so sorry you're going through this // Je comprends ce que vous ressentez, Je suis vraiment désolé que vous expérimentiez cette situation</div> </div>
+                <div class="nested-item"> <div class="static-item">Let me take care of this // Ne vous inquiétez pas, je vais prendre soin de ça</div> </div>
+                <div class="nested-item"> <div class="static-item">It's going to be my pleasure to help you // Avec plaisir Je vais vous aider</div> </div>
+                <div class="nested-item"> <div class="static-item">Let me do my best // Laissez-moi faire mon meilleur effort</div> </div>
+                <div class="static-item-container"> <div class="static-item">HOLD • Can you allow me 3 to 4 minutes on a brief silence-hold? Can I place you on a brief silence-hold during 3 to 4 minutes? // EN ATTENTE • Est-ce que je peux vous mettre en attente pendant 3 à 4 minutes, s'il vous plaît ? Est-ce que vous pouvez patienter quelques 3 à 4 minutes, s'il vous plaît ? Je vous reviens</div> </div>
+                <div class="static-item-container"> <div class="static-item">Ok, let me go ahead and provide you with your case number // Laissez-moi vous donner votre numéro de billet </div> </div>
+                <div class="static-item-container"> <div class="static-item">Anything else to help you today? // À part ça, est-ce qu'il y a une autre chose pour vous aider?</div> </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const items = document.querySelectorAll('.list-item');
+            const resetButton = document.querySelector('.reset-button');
+            const countDisplay = document.getElementById('count');
+            items.forEach((item, index) => {
+                if (localStorage.getItem(`item-${index}`) === 'true') {
+                    item.classList.add('active');
+                }
+                item.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    updateCount();
+                    localStorage.setItem(`item-${index}`, this.classList.contains('active'));
+                });
+            });
+            resetButton.addEventListener('click', function() {
+                items.forEach((item, index) => {
+                    item.classList.remove('active');
+                    localStorage.removeItem(`item-${index}`);
+                });
+                updateCount();
+                clearInterval(timerInterval);
+                isRunning = false;
+                timerLabel.textContent = 'Click to Start';
+                timerDisplay.classList.remove('timer-critical');
+                seconds = 0;
+                timerDisplay.textContent = '00:00';
+            });
+            function updateCount() {
+                const activeItems = document.querySelectorAll('.list-item.active');
+                countDisplay.textContent = activeItems.length > 0 ? activeItems.length : '';
+            }
+            updateCount();
+            const timerContainer = document.querySelector('.timer-container');
+            const timerDisplay = document.getElementById('timer');
+            const timerLabel = document.querySelector('.timer-label');
+            let seconds = 0;
+            let timerInterval;
+            let isRunning = false;
+            function startTimer() {
+                if (!isRunning) {
+                    isRunning = true;
+                    timerLabel.textContent = 'Click to Reset';
+                    timerInterval = setInterval(updateTimer, 1000);
+                } else {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    seconds = 0;
+                    timerDisplay.textContent = '00:00';
+                    timerDisplay.classList.remove('timer-critical');
+                    timerLabel.textContent = 'Click to Start';
+                }
+            }
+            function updateTimer() {
+                if (seconds >= 240) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    timerLabel.textContent = 'Click to Start';
+                    return;
+                }
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                if (seconds >= 165) {
+                    timerDisplay.classList.add('timer-critical');
+                } else {
+                    timerDisplay.classList.remove('timer-critical');
+                }
+            }
+            seconds = 0;
+            timerDisplay.textContent = '00:00';
+            timerLabel.textContent = 'Click to Start';
+            isRunning = false;
+            timerContainer.addEventListener('click', startTimer);
+        });
+    </script>
 </body>
 </html>
